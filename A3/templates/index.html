@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>Bem-vindo ao Sistema de Estoque</h1>
+    <p>Gerencie suas categorias e produtos de forma simples e eficiente.</p>
+    <div class="button-group">
+        <a href="{{ url_for('cadastrar_categoria') }}" class="btn">Cadastrar Categoria</a>
+        <a href="{{ url_for('cadastrar_produto') }}" class="btn">Cadastrar Produto</a>
+    </div>
+</div>
+{% endblock %}
