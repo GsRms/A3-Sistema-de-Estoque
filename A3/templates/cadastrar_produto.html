@@ -3,15 +3,26 @@
 <div class="form-container">
     <h2>Cadastrar Produto</h2>
     <form method="POST" action="{{ url_for('cadastrar_produto') }}">
-        <label for="nome">Nome do Produto</label>
-        <input type="text" id="nome" name="nome" required>
-        <label for="descricao">Descrição</label>
-        <textarea id="descricao" name="descricao" rows="4" required></textarea>
-        <label for="preco">Preço</label>
-        <input type="number" id="preco" name="preco" step="0.01" required>
-        <label for="quantidade">Quantidade</label>
-        <input type="number" id="quantidade" name="quantidade" required>
-        <button type="submit" class="btn">Cadastrar</button>
+        <label for="nome">Nome do Produto:</label>
+        <input type="text" id="nome" name="nome" required><br><br>
+
+        <label for="categoria_id">Categoria:</label>
+        <select id="categoria_id" name="categoria_id">
+            {% for categoria in categorias %}
+                <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="descricao">Descrição:</label>
+        <textarea id="descricao" name="descricao"></textarea><br><br>
+
+        <label for="preco">Preço:</label>
+        <input type="number" step="0.01" id="preco" name="preco" required><br><br>
+
+        <label for="quantidade">Quantidade em Estoque:</label>
+        <input type="number" id="quantidade" name="quantidade" required><br><br>
+
+        <button type="submit" class="btn">Cadastrar Produto</button>
     </form>
 </div>
 {% endblock %}
