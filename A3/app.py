@@ -6,7 +6,7 @@ app.secret_key = 'sua_chave_secreta'
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': '1234',
+    'password': '',
     'database': 'estoque'
 }
 
@@ -16,7 +16,7 @@ def create_connection():
         host='localhost',
         database='estoque',
         user='root',
-        password='1234'
+        password=''
     )
 
 @app.route('/')
