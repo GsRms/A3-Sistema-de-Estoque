@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 import mysql.connector
+from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = 'sua_chave_secreta'
@@ -19,11 +20,59 @@ def create_connection():
         password=''
     )
 
+# Decorador para proteger rotas
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash("Você precisa estar logado para acessar esta página.", "danger")
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Página de login
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        connection = create_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        try:
+            cursor.execute("SELECT * FROM usuarios WHERE email = %s AND senha = %s", (email, password))
+            user = cursor.fetchone()
+
+            if user:
+                session['user_id'] = user['id']
+                session['user_name'] = user['nome']
+                flash("Login realizado com sucesso!", "success")
+                return redirect(url_for('home'))
+            else:
+                flash("Credenciais inválidas. Tente novamente.", "danger")
+        except Exception as e:
+            flash(f"Erro ao processar login: {e}", "danger")
+        finally:
+            cursor.close()
+            connection.close()
+    return render_template('login.html')
+
+# Página de logout
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("Você foi desconectado.", "info")
+    return redirect(url_for('login'))
+
+# Página inicial (exemplo de rota protegida)
 @app.route('/')
+@login_required
 def home():
-    return render_template('index.html')
+    return render_template('index.html', user_name=session.get('user_name'))
 
 @app.route('/cadastrar_produto', methods=['GET', 'POST'])
+@login_required
 def cadastrar_produto():
     if request.method == 'POST':
         nome = request.form['nome']
@@ -54,6 +103,7 @@ def cadastrar_produto():
 
 
 @app.route('/cadastrar_produto/sucesso', methods=['POST'])
+@login_required
 def sucesso_cadastro_produto():
     nome = request.form['nome']
     descricao = request.form['descricao']
@@ -77,17 +127,20 @@ def sucesso_cadastro_produto():
     return render_template('sucesso_cadastro_produto.html')
 
 @app.route('/entradas', methods=['GET'])
+@login_required
 def entradas():
     produtos = get_all_produtos()
     return render_template('entradas.html', produtos=produtos)
 
 @app.route('/saidas', methods=['GET'])
+@login_required
 def saidas():
     produtos = get_all_produtos()
     return render_template('saidas.html', produtos=produtos)
 
 
 @app.route('/buscar_produtos', methods=['GET'])
+@login_required
 def buscar_produtos():
     query = request.args.get('query', '')
     produtos = buscar_produtos(query)
@@ -161,6 +214,7 @@ def get_db_connection():
     return mysql.connector.connect(**db_config)
 
 @app.route('/cadastrar_categoria', methods=['GET', 'POST'])
+@login_required
 def cadastrar_categoria():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -197,6 +251,7 @@ def cadastrar_categoria():
 
 
 @app.route('/remover_categoria/<int:categoria_id>', methods=['GET', 'POST'])
+@login_required
 def remover_categoria(categoria_id):
     if request.method == 'POST':
         conn = get_db_connection()
@@ -217,6 +272,7 @@ def remover_categoria(categoria_id):
 
 
 @app.route('/editar_categoria/<int:categoria_id>', methods=['GET', 'POST'])
+@login_required
 def editar_categoria(categoria_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -255,6 +311,7 @@ def editar_categoria(categoria_id):
     return render_template('editar_categoria.html', categoria=categoria)
 
 @app.route('/editar_produto/<int:produto_id>', methods=['GET', 'POST'])
+@login_required
 def editar_produto(produto_id):
     connection = create_connection()
     cursor = connection.cursor(dictionary=True)
@@ -295,6 +352,7 @@ def editar_produto(produto_id):
 
 
 @app.route('/remover_produto/<int:produto_id>', methods=['GET', 'POST'])
+@login_required
 def remover_produto(produto_id):
     if request.method == 'POST':
         connection = create_connection()
@@ -315,6 +373,7 @@ def remover_produto(produto_id):
 
 
 @app.route('/detalhes_produto/<int:produto_id>')
+@login_required
 def detalhes_produto(produto_id):
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor(dictionary=True)
@@ -387,6 +446,7 @@ def get_categoria(categoria_id):
         connection.close()
 
 @app.route('/categoria/listar', methods=['GET'])
+@login_required
 def listar_categorias():
     connection = create_connection()
     cursor = connection.cursor(dictionary=True)
