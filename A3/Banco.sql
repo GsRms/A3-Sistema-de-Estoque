@@ -43,3 +43,12 @@ CREATE TABLE IF NOT EXISTS usuarios (
     email VARCHAR(255) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL
 );
+
+CREATE TABLE logs_estoque (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    produto_id INT NOT NULL,
+    quantidade INT NOT NULL,
+    tipo VARCHAR(10) NOT NULL,  -- 'entrada' ou 'saida'
+    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+);

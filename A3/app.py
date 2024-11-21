@@ -3,7 +3,7 @@ import mysql.connector
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = 'sua_chave_secreta'
+app.secret_key = 'hjsdbasbdasdsadkjlaskldsajkodnasjkdjk'
 db_config = {
     'host': 'localhost',
     'user': 'root',
@@ -30,6 +30,31 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def registrar_log(produto_id, quantidade, tipo):
+    # Verificar se o produto existe antes de registrar o log
+    connection = create_connection()
+    cursor = connection.cursor()
+    try:
+        # Verificando se o produto existe na tabela 'produtos'
+        cursor.execute("SELECT id FROM produtos WHERE id = %s", (produto_id,))
+        produto = cursor.fetchone()
+
+        if not produto:
+            raise ValueError(f"Produto com ID {produto_id} não encontrado.")
+
+        # Se o produto existir, registrar o log
+        cursor.execute(
+            "INSERT INTO logs_estoque (produto_id, quantidade, tipo) VALUES (%s, %s, %s)",
+            (produto_id, quantidade, tipo)
+        )
+        connection.commit()
+    except Exception as e:
+        print(f"Erro ao registrar log: {e}")
+    finally:
+        cursor.close()
+        connection.close()
+
+
 # Página de login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -48,7 +73,7 @@ def login():
                 session['user_id'] = user['id']
                 session['user_name'] = user['nome']
                 flash("Login realizado com sucesso!", "success")
-                return redirect(url_for('home'))
+                return render_template('index.html')
             else:
                 flash("Credenciais inválidas. Tente novamente.", "danger")
         except Exception as e:
@@ -155,10 +180,8 @@ def buscar_produtos(query):
         query = "%" + query.lower() + "%"
         cursor.execute("SELECT p.id, p.nome, p.descricao, p.preco, p.quantidade, c.id AS categoria_id, c.nome AS categoria_nome FROM produtos p JOIN categorias c ON p.categoria_id = c.id WHERE LOWER(p.nome) LIKE %s", (query,))
         produtos = cursor.fetchall()
-
         for produto in produtos:
             produto['preco_total'] = produto['preco'] * produto['quantidade']
-
         return produtos
     
     except Exception as e:
@@ -229,7 +252,7 @@ def cadastrar_categoria():
             query = "SELECT COUNT(*) FROM categorias WHERE nome = %s"
             cursor.execute(query, (nome,))
             result = cursor.fetchone()
-
+            # registrar_log(nome, quantidade, 'entrada') -- definir as logs dps de criar tudo
             if result['COUNT(*)'] > 0:
                 flash("A categoria já foi criada!", "danger")
             else:
