@@ -46,9 +46,10 @@ CREATE TABLE IF NOT EXISTS usuarios (
 
 CREATE TABLE logs_estoque (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    produto_id INT NOT NULL,
-    quantidade INT NOT NULL,
-    tipo VARCHAR(10) NOT NULL,  -- 'entrada' ou 'saida'
-    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+    entidade VARCHAR(50) NOT NULL,          -- Tipo da entidade (ex.: 'produto', 'categoria')
+    entidade_id INT,                        -- ID da entidade relacionada (produto_id, categoria_id, etc.)
+    descricao TEXT NOT NULL,                -- Descrição detalhada do log
+    quantidade INT,                         -- Quantidade (se aplicável)
+    tipo VARCHAR(50) NOT NULL,              -- Tipo de operação (ex.: 'entrada', 'saída', 'edição')
+    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
