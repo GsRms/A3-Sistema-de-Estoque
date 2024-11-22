@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import mysql.connector
 from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = 'hjsdbasbdasdsadkjlaskldsajkodnasjkdjk'
+app.secret_key = 'hjsewffdbasbdasewrewdsadkjlaskldsajkodnasjkdjk'
 db_config = {
     'host': 'localhost',
     'user': 'root',
@@ -19,6 +20,12 @@ def create_connection():
         user='root',
         password=''
     )
+
+def generate_password_hash(password):
+    return generate_password_hash(password)
+
+def check_password_hash(hashed_password, password):
+    return check_password_hash(hashed_password, password)
 
 # Decorador para proteger rotas
 def login_required(f):
@@ -55,6 +62,41 @@ def registrar_log(produto_id, quantidade, tipo):
         connection.close()
 
 
+@app.route('/cadastro', methods=['GET'])
+def cadastrar_usuario():
+    return render_template('cadastro.html')
+
+@app.route('/cadastrar', methods=['POST'])
+def cadastrar_usuario_post():
+    email = request.form.get('email')
+    senha = request.form.get('password')
+
+    connection = create_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        # Verifica se o email já está em uso
+        cursor.execute("SELECT * FROM usuarios WHERE email = %s", (email,))
+        existing_user = cursor.fetchone()
+
+        if existing_user:
+            flash("Email já está em uso. Tente outro.", "danger")
+        else:
+            # Insere o usuário na tabela sem hashing de senha
+            cursor.execute(
+                "INSERT INTO usuarios (email, senha) VALUES (%s, %s)",
+                (email, senha)
+            )
+            connection.commit()
+            flash("Usuário cadastrado com sucesso!", "success")
+        return redirect(url_for('cadastrar_usuario'))
+    except Exception as e:
+
+        flash(f"Erro ao cadastrar usuário: {e}", "danger")
+    finally:
+        cursor.close()
+        connection.close()
+
 # Página de login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -71,7 +113,7 @@ def login():
 
             if user:
                 session['user_id'] = user['id']
-                session['user_name'] = user['nome']
+           #     session['user_name'] = user['nome']
                 flash("Login realizado com sucesso!", "success")
                 return render_template('index.html')
             else:
