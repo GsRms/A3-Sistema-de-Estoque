@@ -539,3 +539,52 @@ hr {
   margin: 0 !important;
 
 }
+
+.logs-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.logs-section {
+  margin-bottom: 40px;
+}
+
+.logs-header {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  padding: 10px;
+  color: white;
+  border-radius: 5px;
+}
+
+.logs-header.entrada { background-color: #4CAF50; } /* Verde para entradas */
+.logs-header.saida { background-color: #f44336; }   /* Vermelho para saídas */
+.logs-header.edicao { background-color: #ff9800; }  /* Laranja para edições */
+.logs-header.criacao { background-color: #2196F3; } /* Azul para criações */
+.logs-header.remocao { background-color: #9C27B0; } /* Roxo para remoções */
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.logs-table th, .logs-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.logs-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.logs-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.logs-table tr:hover {
+  background-color: #f1f1f1;
+}

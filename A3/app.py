@@ -37,22 +37,21 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def registrar_log(produto_id, quantidade, tipo):
-    # Verificar se o produto existe antes de registrar o log
+def registrar_log(entidade, entidade_id, acao, descricao=""):
+    """
+    Registra logs de ações no sistema.
+
+    :param entidade: Nome da entidade (ex: 'produto', 'categoria')
+    :param entidade_id: ID da entidade associada ao log
+    :param acao: Tipo da ação ('criação', 'edição', 'removido', 'entrada', 'saída')
+    :param descricao: Mensagem descritiva opcional
+    """
     connection = create_connection()
     cursor = connection.cursor()
     try:
-        # Verificando se o produto existe na tabela 'produtos'
-        cursor.execute("SELECT id FROM produtos WHERE id = %s", (produto_id,))
-        produto = cursor.fetchone()
-
-        if not produto:
-            raise ValueError(f"Produto com ID {produto_id} não encontrado.")
-
-        # Se o produto existir, registrar o log
         cursor.execute(
-            "INSERT INTO logs_estoque (produto_id, quantidade, tipo) VALUES (%s, %s, %s)",
-            (produto_id, quantidade, tipo)
+            "INSERT INTO logs_estoque (entidade, entidade_id, acao, descricao) VALUES (%s, %s, %s, %s)",
+            (entidade, entidade_id, acao, descricao)
         )
         connection.commit()
     except Exception as e:
@@ -60,6 +59,46 @@ def registrar_log(produto_id, quantidade, tipo):
     finally:
         cursor.close()
         connection.close()
+
+@app.route('/logs')
+def logs():
+    connection = create_connection()
+    cursor = connection.cursor()
+    try:
+        cursor.execute("""
+            SELECT 
+                id, 
+                entidade, 
+                entidade_id, 
+                acao, 
+                descricao, 
+                data_hora 
+            FROM logs_estoque
+            ORDER BY data_hora DESC
+        """)
+        logs = cursor.fetchall()  # Retorna uma lista de tuplas
+        print(f"Logs encontrados: {len(logs)}")  # Verifique o número de logs encontrados
+    finally:
+        cursor.close()
+        connection.close()
+
+    # Verifique se logs está vazio
+    if not logs:
+        print("Nenhum log encontrado.")
+    
+    # Organizar logs por tipo de ação
+    logs_categorized = {
+        'entrada': [log for log in logs if log[3] == 'entrada'],
+        'saida': [log for log in logs if log[3] == 'saída'],
+        'edicao': [log for log in logs if log[3] == 'edição'],
+        'criacao': [log for log in logs if log[3] == 'criação'],
+        'remocao': [log for log in logs if log[3] == 'remoção']
+    }
+
+    # Verifique os logs categorizados
+    print("Logs categorizados:", logs_categorized)
+
+    return render_template('logs.html', title="Histórico de Logs", logs=logs_categorized)
 
 
 @app.route('/cadastro', methods=['GET'])
@@ -136,8 +175,18 @@ def logout():
 @app.route('/')
 @login_required
 def home():
-    return render_template('index.html', user_name=session.get('user_name'))
+    connection = create_connection()
+    cursor = connection.cursor()
+    try:
+        # Busca os 10 logs mais recentes
+        cursor.execute("SELECT entidade, entidade_id, acao, descricao, data_hora FROM logs_estoque ORDER BY data_hora DESC LIMIT 10")
+        logs = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
 
+    # Renderiza a página inicial com os logs
+    return render_template('index.html', title="Página Principal", logs=logs)
 @app.route('/cadastrar_produto', methods=['GET', 'POST'])
 @login_required
 def cadastrar_produto():
@@ -155,6 +204,12 @@ def cadastrar_produto():
                 (nome, descricao, preco, quantidade, categoria_id)
             )
             connection.commit()
+            registrar_log(
+                entidade='produto',
+                entidade_id=cursor.lastrowid,  # ID do produto recém-criado
+                acao='criação',
+                descricao=f"Produto '{nome}' cadastrado com {quantidade} unidades e preço {preco}."
+            )
             flash("Produto cadastrado com sucesso!", "success")
         except Exception as e:
             flash(f"Erro: {e}", "danger")
@@ -193,17 +248,54 @@ def sucesso_cadastro_produto():
         connection.close()
     return render_template('sucesso_cadastro_produto.html')
 
-@app.route('/entradas', methods=['GET'])
+@app.route('/entradas')
 @login_required
 def entradas():
-    produtos = get_all_produtos()
-    return render_template('entradas.html', produtos=produtos)
+    connection = create_connection()
+    cursor = connection.cursor()
+    try:
+        # Filtrar logs de entradas
+        cursor.execute("""
+            SELECT 
+                id, 
+                descricao, 
+                data_hora 
+            FROM logs_estoque 
+            WHERE acao = 'entrada'
+            ORDER BY data_hora DESC
+        """)
+        entradas = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
 
-@app.route('/saidas', methods=['GET'])
+    # Renderiza o template de entradas com os dados
+    return render_template('entradas.html', title="Entradas de Produtos", logs=entradas)
+
+@app.route('/saidas')
 @login_required
 def saidas():
-    produtos = get_all_produtos()
-    return render_template('saidas.html', produtos=produtos)
+    connection = create_connection()
+    cursor = connection.cursor()
+    try:
+        # Filtrar logs de saídas
+        cursor.execute("""
+            SELECT 
+                id, 
+                descricao, 
+                data_hora 
+            FROM logs_estoque 
+            WHERE acao = 'saída' 
+            ORDER BY data_hora DESC
+        """)
+        saidas = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
+
+    # Renderiza o template de saídas com os dados
+    return render_template('saidas.html', title="Saídas de Produtos", logs=saidas)
+
 
 
 @app.route('/buscar_produtos', methods=['GET'])
@@ -269,6 +361,12 @@ def update_quantidade(produto_id, quantidade):
     try:
         cursor.execute("UPDATE produtos SET quantidade = quantidade + %s WHERE id = %s", (quantidade, produto_id))
         connection.commit()
+        registrar_log(
+            entidade='produto',
+            entidade_id=produto_id,
+            acao='entrada' if quantidade > 0 else 'saída',
+            descricao=f"Alteração de quantidade: {quantidade} unidades."
+        )
     except Exception as e:
         print(f"Erro: {e}")
     finally:
@@ -294,7 +392,6 @@ def cadastrar_categoria():
             query = "SELECT COUNT(*) FROM categorias WHERE nome = %s"
             cursor.execute(query, (nome,))
             result = cursor.fetchone()
-            # registrar_log(nome, quantidade, 'entrada') -- definir as logs dps de criar tudo
             if result['COUNT(*)'] > 0:
                 flash("A categoria já foi criada!", "danger")
             else:
@@ -302,6 +399,12 @@ def cadastrar_categoria():
                     query = "INSERT INTO categorias (nome, descricao) VALUES (%s, %s)"
                     cursor.execute(query, (nome, descricao))
                     conn.commit()
+                    registrar_log(
+                        entidade='categoria',
+                        entidade_id=cursor.lastrowid,
+                        acao='criação',
+                        descricao=f"Categoria '{nome}' criada com descrição: {descricao}."
+                    )
                     flash("Categoria cadastrada com sucesso!", "success")
                 except Exception as e:
                     flash(f"Erro ao cadastrar a categoria: {e}", "danger")
@@ -329,7 +432,12 @@ def remover_categoria(categoria_id):
         cursor.execute(query, (categoria_id,))
         
         conn.commit()
-
+        registrar_log(
+            entidade='categoria',
+            entidade_id=categoria_id,
+            acao='removido',
+            descricao=f"Categoria ID={categoria_id} foi removida e desassociada dos produtos."
+        )
         flash("Categoria desassociada com sucesso!", "success")
         conn.close()
 
@@ -362,6 +470,12 @@ def editar_categoria(categoria_id):
                 cursor.execute(query, (nome, descricao, categoria_id))
                 conn.commit()
                 flash("Categoria editada com sucesso!", "success")
+                registrar_log(
+                    entidade='categoria',
+                    entidade_id=categoria_id,
+                    acao='edição',
+                    descricao=f"Categoria ID={categoria_id} editada. Novo Nome='{nome}', Descrição='{descricao}'."
+                )
             except Exception as e:
                 flash(f"Erro ao editar a categoria: {e}", "danger")
 
@@ -391,6 +505,12 @@ def editar_produto(produto_id):
         query = "UPDATE produtos SET nome=%s, descricao=%s, preco=%s, quantidade=%s, categoria_id=%s WHERE id=%s"
         cursor.execute(query, (nome, descricao, preco, quantidade, categoria_id, produto_id))
         connection.commit()
+        registrar_log(
+            entidade='produto',
+            entidade_id=produto_id,
+            acao='edição',
+            descricao=f"Produto '{nome}' foi atualizado: Preço={preco}, Quantidade={quantidade}."
+        )
 
         flash("Produto editado com sucesso!", "success")
         cursor.close()
@@ -426,6 +546,13 @@ def remover_produto(produto_id):
             cursor.execute("DELETE FROM produtos WHERE id = %s", (produto_id,))
             connection.commit()
             flash("Produto removido com sucesso!", "success")
+            registrar_log(
+                entidade='produto',
+                entidade_id=produto_id,
+                acao='removido',
+                descricao=f"Produto ID={produto_id} foi removido."
+            )
+
         except Exception as e:
             flash(f"Erro: {e}", "danger")
         finally:
