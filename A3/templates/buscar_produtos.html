@@ -34,14 +34,15 @@
                         <td>R$ {{ '%.2f' % produto.preco_total }}</td>
                         <td><a href="{{ url_for('categoria', categoria_id=produto.categoria_id) }}">{{ produto.categoria_nome }}</a></td>
                         <td>
-                            <a href="{{ url_for('editar_produto', produto_id=produto.id) }}" class="btn btn-edit">Editar</a>
+                            <a href="{{ url_for('editar_produto', produto_id=produto.id) }}" class="btn btn-warning btn-sm">Editar</a>
                             <form action="{{ url_for('remover_produto', produto_id=produto.id) }}" method="POST" onsubmit="return confirm('Tem certeza de que deseja remover este produto?')">
-                                <button type="submit" class="btn btn-delete">Remover</button>
+                                <button type="submit" class="btn btn-danger btn-sm">Remover</button>
                             </form>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
+            
         </table>
     {% else %}
         <p>Nenhum produto encontrado.</p>
