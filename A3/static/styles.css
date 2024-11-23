@@ -1,11 +1,54 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
   margin: 0;
   padding: 0;
   background-color: #f9f9f9;
   color: #333;
+}
+
+/* Cartão com borda dinâmica */
+.card-bordered {
+  border: 2px solid transparent;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(to right, #ffffff, #ffffff) padding-box, 
+              linear-gradient(to right, #2b0152, #2b0152) border-box;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Efeito de sombra ao passar o mouse */
+.card-bordered:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  border-color: #2b0152; /* Cor para destacar ao hover */
+}
+
+/* Ícone */
+.card-icon {
+  font-size: 50px;
+  color: #2b0152;
+  transition: color 0.3s ease;
+}
+
+/* Ícone muda de cor ao passar o mouse */
+.card-bordered:hover .card-icon {
+  color: #10011f;
+}
+
+/* Título do cartão */
+.card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+/* Texto */
+.card-text {
+  color: #666;
+  font-size: 0.9rem;
 }
 
 header {
@@ -20,10 +63,12 @@ nav a {
   text-decoration: none;
   color: white;
   font-weight: bold;
+  font-size: 1.2rem;
 }
 
 nav a:hover {
   text-decoration: underline;
+  color: #f0e6ff;
 }
 
 .container {
@@ -41,24 +86,164 @@ p {
   font-size: 1.2rem;
 }
 
-.button-group .btn {
-  margin: 10px;
-  padding: 10px 20px;
-  background-color: #280242;
-  color: white;
-  text-decoration: none;
+button,
+.btn {
+  padding: 8px 16px;
+  border: none;
   border-radius: 5px;
-  transition: background-color 0.3s;
+  background-color: #2b0152;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.button-group .btn:hover {
-  background-color: #230258;
+button:hover,
+.btn:hover {
+  background-color: #2b0152;
+  transform: scale(1.05);
+}
+
+/* Botões de ações gerais */
+.btn-action {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  text-align: center;
+  display: inline-block; /* Garante alinhamento */
+}
+
+.btn-warning {
+  background-color: #ffc107; /* Amarelo */
+}
+/* Botão Editar */
+.btn-edit {
+  background-color: #4CAF50; /* Verde */
+  border: 2px solid transparent; /* Define uma borda padrão */
+  color: white;
+}
+
+/* Botão Remover */
+.btn-delete {
+  background-color: #f44336; /* Vermelho */
+  border: 2px solid transparent; /* Define uma borda padrão */
+  color: white;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+  transform: scale(1.05); /* Aumenta ao passar o mouse */
+}
+
+.btn-danger {
+  background-color: #dc3545; /* Vermelho */
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  transform: scale(1.05);
+}
+
+/* Botões de Ação dentro da célula da tabela */
+td a {
+  display: inline-flex;   /* Usar inline-flex para que os botões fiquem lado a lado */
+  align-items: center;    /* Garante que o conteúdo dos botões fiquem alinhados verticalmente */
+  justify-content: center;/* Garante que o conteúdo dos botões fiquem centralizados */
+  margin-right: 10px;      /* Espaçamento entre os botões */
+  padding: 8px 16px;       /* Espaçamento interno */
+  font-size: 14px;         /* Tamanho da fonte */
+  border-radius: 5px;      /* Bordas arredondadas */
+  cursor: pointer;        /* Cursor de pointer ao passar o mouse */
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+td {
+  text-align: center;
+}
+
+/* Ajuste na tabela para um espaçamento melhor entre as células */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table th, table td {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+table th {
+  background-color: #f4f4f4;
+}
+
+h2 {
+  margin-bottom: 10px;
+}
+
+form label, form input {
+  margin-bottom: 10px;
+}
+
+.btn-edit:hover {
+  background-color: #45a049;
+  transform: scale(1.05); /* Pequeno destaque ao passar o mouse */
+}
+
+.btn-delete:hover {
+  background-color: #e53935;
+  transform: scale(1.05);
+}
+
+/* Ajuste para alinhamento em listas ou tabelas */
+.action-buttons {
+  display: flex;
+  gap: 10px; /* Espaçamento entre os botões */
+  justify-content: flex-start; /* Alinhamento à esquerda */
+  align-items: center; /* Centraliza os botões verticalmente */
+}
+
+/* Exemplo para tabelas */
+.table .action-buttons {
+  justify-content: center; /* Centraliza os botões dentro das células */
+}
+
+.form-container label {
+  font-size: 1.1rem; /* Tamanho maior para o texto dos rótulos */
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+/* Específico para o <select> */
+.form-select {
+  font-size: 1.1rem; /* Maior que os demais */
+  background-color: #f9f9f9;
+  cursor: pointer;
+  border: 2px solid #007bff;
+  transition: border-color 0.3s;
+}
+
+.form-select:focus {
+  border-color: #0056b3;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 .form-container {
   width: 50%;
-  margin: 50px auto;
+  margin: 0 auto;
   padding: 20px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+  max-width: 1200px;
   background: white;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -76,7 +261,7 @@ label {
 
 input,
 textarea {
-  padding: 10px;
+  padding: 15px;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 1rem;
@@ -85,19 +270,9 @@ textarea {
   box-sizing: border-box;
 }
 
-button.btn {
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  background-color: #280242;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-button.btn:hover {
-  background-color: #4b176e;
+input:focus {
+  border-color: #2b0152;
+  outline: none;
 }
 
 footer {
@@ -114,210 +289,60 @@ footer {
   width: 100%;
   border-collapse: collapse;
 }
+
 th,
 td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
 }
+
 th {
   background-color: #f2f2f2;
-}
-
-.btn-edit {
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  background-color: #0d4202;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-/* Arquivo: styles.css */
-
-.btn {
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.btn-search,
-.btn-delete,
-.btn-edit {
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.form-delete button {
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.form-delete button:hover {
-  background-color: #c82333;
-}
-
-/* Transições e estilo para NUI */
-.nui-card {
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  background-color: #fff;
-  transition: transform 0.3s ease-in-out, opacity 0.3s;
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.nui-card .card-body {
-  padding: 20px;
-  text-align: center;
-}
-
-.nui-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-}
-
-.btn-action {
-  padding: 10px 20px;
-  font-size: 1rem;
-  border-radius: 5px;
-  transition: transform 0.3s, box-shadow 0.3s;
-  background-color: #24212173;
-}
-
-.btn-action:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(134, 134, 134, 0.2);
-}
-
-/* Estilo específico para o Home */
-.home-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.card-icon {
-  font-size: 3rem;
-  color: #4b176e;
-  margin-bottom: 15px;
-  transition: transform 0.3s ease-in-out;
-}
-
-.card-icon:hover {
-  transform: scale(1.2);
-}
-
-.nui-card {
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  background-color: white;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-  opacity: 0;
-  transform: translateY(20px);
-  height: 250px; /* Define uma altura mínima consistente */
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* Centraliza verticalmente o conteúdo */
-}
-
-/* Estilizando a classe card-text */
-.card-text {
-  font-size: 1.25rem; /* Um pouco maior para destaque */
-  color: #6200ff; /* Tom neutro para melhor contraste */
-  line-height: 1.6; /* Espaçamento entre linhas para melhorar a legibilidade */
-  margin-bottom: 15px; /* Espaçamento adicional entre o texto e outros elementos */
-  font-style: italic; /* Um leve toque estilizado */
-  text-align: justify; /* Alinhamento mais formal e organizado */
-  transition: color 0.3s ease-in-out;
-}
-
-.card-text:hover {
-  color: #432a7e; /* Mudança de cor sutil ao passar o mouse */
-}
-
-.card-title {
-  font-size: 1.25rem; /* Um pouco maior para destaque */
-  margin-bottom: 1px;
-}
-
-/* Espaçamento maior entre opções no menu principal */
-nav a {
-  margin: 0 25px; /* Maior espaçamento lateral entre os itens */
-  text-decoration: none;
-  color: rgb(255, 255, 255);
-  font-weight: bold;
-  font-size: 1.2rem; /* Um pouco maior para destaque */
-}
-
-nav a:hover {
-  text-decoration: underline;
-  color: #f0e6ff; /* Leve contraste ao passar o mouse */
-}
-
-/* Espaçamento entre itens no menu principal no mobile */
-@media (max-width: 768px) {
-  nav a {
-    display: block; /* Empilhando itens no menu */
-    margin: 5px 0; /* Espaçamento vertical entre os itens */
-  }
-}
-
-.nui-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(35, 2, 78, 0.3);
 }
 
 hr {
   border-top: 2px solid #280242;
 }
 
-/* Botão do menu no canto superior esquerdo */
+/* Estilo do menu */
 .menu-btn {
-  position: fixed; /* Fixa no canto da tela */
-  top: 45px; /* Distância do topo */
-  right: 15px; /* Distância da direita */
-  background-color: #4b176e; /* Fundo destacado */
-  border: none;
-  border-radius: 50%; /* Forma circular */
-  width: 50px; /* Tamanho do botão */
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  width: 50px;
   height: 50px;
+  background-color: #4b176e;
   color: white;
   font-size: 1.5rem;
-  cursor: pointer;
+  border-radius: 50%;
   display: flex;
-  align-items: center; /* Centraliza o ícone verticalmente */
-  justify-content: center; /* Centraliza o ícone horizontalmente */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para destacar */
-  transition: transform 0.3s, background-color 0.3s; /* Animação suave */
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
 }
 
 .menu-btn:hover {
-  background-color: #310485; /* Cor de fundo ao passar o mouse */
-  transform: scale(1.1); /* Leve aumento ao passar o mouse */
+  background-color: #310485;
+  transform: scale(1.1);
 }
 
-/* Sidebar (menu lateral) */
 .sidebar {
   position: fixed;
   top: 0;
-  left: -250px; /* Escondido inicialmente */
+  left: -250px;
   width: 250px;
   height: 100%;
   background-color: #280242;
   color: white;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
   transition: left 0.3s ease-in-out;
   z-index: 1000;
+}
+
+.sidebar.active {
+  left: 0;
 }
 
 .sidebar-header {
@@ -329,16 +354,8 @@ hr {
 }
 
 .sidebar-header h2 {
-  font-size: 1.5rem;
   margin: 0;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: white;
   font-size: 1.5rem;
-  cursor: pointer;
 }
 
 .sidebar-menu {
@@ -362,105 +379,11 @@ hr {
   text-decoration: underline;
 }
 
-/* Sidebar visível */
-.sidebar.active {
-  left: 0; /* Mostra a sidebar */
-}
-
-
-                   /* Outros estilos */
-
-                   .page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    align-content: center;
-    justify-content: center;
-    width: 100%;
-    height: 100vh;
-    background-color: #480ca8;
-}
-
-.formLogin {
-    display: flex;
-    flex-direction: column;
-    background-color: #fff;
-    border-radius: 7px;
-    padding: 40px;
-    box-shadow: 10px 10px 40px rgba(0, 0, 0, 0.4);
-    gap: 5px
-}
-
-.areaLogin img {
-    width: 420px;
-}
-
-.formLogin h1 {
-    padding: 0;
-    margin: 0;
-    font-weight: 500;
-    font-size: 2.3em;
-}
-
-.formLogin p {
-    display: inline-block;
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 25px;
-}
-
-.formLogin input {
-    padding: 15px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    margin-bottom: 20px;
-    margin-top: 5px;
-    border-radius: 4px;
-    transition: all linear 160ms;
-    outline: none;
-}
-
-
-.formLogin input:focus {
-    border: 1px solid #f72585;
-}
-
-.formLogin label {
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.formLogin a {
-    display: inline-block;
-    margin-bottom: 20px;
-    font-size: 13px;
-    color: #555;
-    transition: all linear 160ms;
-}
-
-.formLogin a:hover {
-    color: #f72585;
-}
-
-.btn {
-    background-color: #f72585;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    border: none !important;
-    transition: all linear 160ms;
-    cursor: pointer;
-    margin: 0 !important;
-
-}
-
-/* TELA DE LOGIN */
-
+/* Página de login */
 .page {
   display: flex;
   flex-direction: column;
   align-items: center;
-  align-content: center;
   justify-content: center;
   width: 100%;
   height: 100vh;
@@ -470,45 +393,18 @@ hr {
 .formLogin {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 400px;
   background-color: #fff;
   border-radius: 7px;
   padding: 40px;
-  box-shadow: 10px 10px 40px rgba(0, 0, 0, 0.4);
-  gap: 5px
-}
-
-.areaLogin img {
-  width: 420px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
 .formLogin h1 {
-  padding: 0;
-  margin: 0;
+  margin: 0 0 20px 0;
+  font-size: 2.3rem;
   font-weight: 500;
-  font-size: 2.3em;
-}
-
-.formLogin p {
-  display: inline-block;
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 25px;
-}
-
-.formLogin input {
-  padding: 15px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  margin-bottom: 20px;
-  margin-top: 5px;
-  border-radius: 4px;
-  transition: all linear 160ms;
-  outline: none;
-}
-
-
-.formLogin input:focus {
-  border: 1px solid #f72585;
 }
 
 .formLogin label {
@@ -516,53 +412,45 @@ hr {
   font-weight: 600;
 }
 
+.formLogin input {
+  padding: 15px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
 .formLogin a {
-  display: inline-block;
-  margin-bottom: 20px;
   font-size: 13px;
   color: #555;
-  transition: all linear 160ms;
+  text-decoration: none;
+  transition: color 0.3s;
 }
 
 .formLogin a:hover {
-  color: #f72585;
+  color: #2b0152;
 }
 
-.btn {
-  background-color: #f72585;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  border: none !important;
-  transition: all linear 160ms;
-  cursor: pointer;
-  margin: 0 !important;
-
-}
-
+/* Logs */
 .logs-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
 
-.logs-section {
-  margin-bottom: 40px;
-}
-
 .logs-header {
   font-size: 1.5rem;
-  margin-bottom: 10px;
   padding: 10px;
   color: white;
   border-radius: 5px;
+  margin-bottom: 10px;
 }
 
-.logs-header.entrada { background-color: #4CAF50; } /* Verde para entradas */
-.logs-header.saida { background-color: #f44336; }   /* Vermelho para saídas */
-.logs-header.edicao { background-color: #ff9800; }  /* Laranja para edições */
-.logs-header.criacao { background-color: #2196F3; } /* Azul para criações */
-.logs-header.remocao { background-color: #9C27B0; } /* Roxo para remoções */
+.logs-header.entrada { background-color: #4CAF50; }
+.logs-header.saida { background-color: #f44336; }
+.logs-header.edicao { background-color: #ff9800; }
+.logs-header.criacao { background-color: #2196F3; }
+.logs-header.remocao { background-color: #2b0152; }
 
 .logs-table {
   width: 100%;
@@ -570,7 +458,8 @@ hr {
   margin-top: 10px;
 }
 
-.logs-table th, .logs-table td {
+.logs-table th,
+.logs-table td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
@@ -578,7 +467,6 @@ hr {
 
 .logs-table th {
   background-color: #f2f2f2;
-  font-weight: bold;
 }
 
 .logs-table tr:nth-child(even) {
@@ -587,4 +475,23 @@ hr {
 
 .logs-table tr:hover {
   background-color: #f1f1f1;
+}
+
+
+/* ALERTAS FLASH */
+
+.alert {
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 5px;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
 }

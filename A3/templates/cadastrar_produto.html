@@ -7,7 +7,7 @@
         <input type="text" id="nome" name="nome" required><br><br>
 
         <label for="categoria_id">Categoria:</label>
-        <select id="categoria_id" name="categoria_id">
+        <select id="categoria_id" name="categoria_id" class="form-select">
             {% for categoria in categorias %}
                 <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
             {% endfor %}

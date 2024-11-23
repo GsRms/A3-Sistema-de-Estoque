@@ -214,34 +214,48 @@ def cadastrar_produto():
     if request.method == 'POST':
         nome = request.form['nome']
         descricao = request.form['descricao']
-        preco = float(request.form['preco'])
-        quantidade = int(request.form['quantidade'])
-        categoria_id = request.form['categoria_id']  
-        connection = create_connection()
-        cursor = connection.cursor()
         try:
-            cursor.execute(
-                "INSERT INTO produtos (nome, descricao, preco, quantidade, categoria_id) VALUES (%s, %s, %s, %s, %s)",
-                (nome, descricao, preco, quantidade, categoria_id)
-            )
-            connection.commit()
-            registrar_log(
-                entidade='produto',
-                entidade_id=cursor.lastrowid,  # ID do produto recém-criado
-                acao='criação',
-                descricao=f"Produto '{nome}' cadastrado com {quantidade} unidades e preço {preco}.",
-                usuario = session.get('user_id', 'Desconhecido')  # Busca o ID do usuário logado ou 'Desconhecido'
-            )
-            flash("Produto cadastrado com sucesso!", "success")
-        except Exception as e:
-            flash(f"Erro: {e}", "danger")
-        finally:
-            cursor.close()
-            connection.close()
-        return render_template('sucesso_cadastro_produto.html')
+            preco = float(request.form['preco'])
+            quantidade = int(request.form['quantidade'])
+            categoria_id = request.form['categoria_id']
+            
+            # Validação: impede valores maiores que 100.000
+            if preco > 1000000 or quantidade > 100000:
+                flash("O preço e a quantidade não podem ser maiores que 100.000.", "danger")
+                categorias = get_all_categorias()
+                return render_template('cadastrar_produto.html', categorias=categorias)
+
+            connection = create_connection()
+            cursor = connection.cursor()
+            try:
+                cursor.execute(
+                    "INSERT INTO produtos (nome, descricao, preco, quantidade, categoria_id) VALUES (%s, %s, %s, %s, %s)",
+                    (nome, descricao, preco, quantidade, categoria_id)
+                )
+                connection.commit()
+                registrar_log(
+                    entidade='produto',
+                    entidade_id=cursor.lastrowid,  # ID do produto recém-criado
+                    acao='criação',
+                    descricao=f"Produto '{nome}' cadastrado com {quantidade} unidades e preço {preco}.",
+                    usuario=session.get('user_id', 'Desconhecido')  # Busca o ID do usuário logado ou 'Desconhecido'
+                )
+                flash("Produto cadastrado com sucesso!", "success")
+            except Exception as e:
+                flash(f"Erro: {e}", "danger")
+            finally:
+                cursor.close()
+                connection.close()
+            return render_template('sucesso_cadastro_produto.html')
+
+        except ValueError:
+            flash("Preencha os campos de preço e quantidade corretamente.", "danger")
+            categorias = get_all_categorias()
+            return render_template('cadastrar_produto.html', categorias=categorias)
     else:
-        categorias = get_all_categorias()  
+        categorias = get_all_categorias()
         return render_template('cadastrar_produto.html', categorias=categorias)
+
 
 
 
@@ -273,7 +287,6 @@ def sucesso_cadastro_produto():
 
 @app.route('/entradas')
 @login_required
-@permission_required('viewer', 'admin')
 def entradas():
     connection = create_connection()
     cursor = connection.cursor()
@@ -298,7 +311,6 @@ def entradas():
 
 @app.route('/saidas')
 @login_required
-@permission_required('viewer', 'admin')
 def saidas():
     connection = create_connection()
     cursor = connection.cursor()
@@ -325,7 +337,7 @@ def saidas():
 
 @app.route('/buscar_produtos', methods=['GET'])
 @login_required
-@permission_required('viewer', 'admin')
+# @permission_required('viewer' or 'admin')
 def buscar_produtos():
     query = request.args.get('query', '')
     produtos = buscar_produtos(query)
@@ -603,7 +615,7 @@ def remover_produto(produto_id):
 
 @app.route('/detalhes_produto/<int:produto_id>')
 @login_required
-@permission_required('viewer', 'admin')
+@permission_required('viewer' or 'admin')
 def detalhes_produto(produto_id):
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor(dictionary=True)
@@ -677,7 +689,7 @@ def get_categoria(categoria_id):
 
 @app.route('/categoria/listar', methods=['GET'])
 @login_required
-@permission_required('viewer', 'admin')
+@permission_required('viewer' or 'admin')
 def listar_categorias():
     connection = create_connection()
     cursor = connection.cursor(dictionary=True)

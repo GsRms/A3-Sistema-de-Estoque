@@ -26,7 +26,7 @@
             <tbody>
                 {% for produto in resultado %}
                     <tr>
-                        <td>{{ produto.id }}</td>
+                        <td style="{% if produto.quantidade < 50 %}color: red;{% endif %}">{{ produto.id }}</td>
                         <td><a href="{{ url_for('detalhes_produto', produto_id=produto.id) }}">{{ produto.nome }}</a></td>
                         <td>{{ produto.descricao }}</td>
                         <td>R$ {{ '%.2f' % produto.preco }}</td>
@@ -42,7 +42,6 @@
                     </tr>
                 {% endfor %}
             </tbody>
-            
         </table>
     {% else %}
         <p>Nenhum produto encontrado.</p>
