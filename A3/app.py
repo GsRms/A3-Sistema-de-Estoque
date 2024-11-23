@@ -4,7 +4,7 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = 'hjsewffdbasbdasewrewdsadkjlaskldsajkodnasjkdjk'
+app.secret_key = 'hjsewffdbasbdasewrdewsssdkskldsajkodnasjkdjk'
 db_config = {
     'host': 'localhost',
     'user': 'root',
@@ -37,7 +37,8 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def registrar_log(entidade, entidade_id, acao, descricao=""):
+def registrar_log(entidade, entidade_id, acao, descricao, usuario):
+
     """
     Registra logs de ações no sistema.
 
@@ -45,14 +46,15 @@ def registrar_log(entidade, entidade_id, acao, descricao=""):
     :param entidade_id: ID da entidade associada ao log
     :param acao: Tipo da ação ('criação', 'edição', 'removido', 'entrada', 'saída')
     :param descricao: Mensagem descritiva opcional
+    :param usuario: Nome do usuário que realizou a ação
     """
     connection = create_connection()
     cursor = connection.cursor()
     try:
-        cursor.execute(
-            "INSERT INTO logs_estoque (entidade, entidade_id, acao, descricao) VALUES (%s, %s, %s, %s)",
-            (entidade, entidade_id, acao, descricao)
-        )
+        cursor.execute("""
+            INSERT INTO logs_estoque (entidade, entidade_id, acao, descricao, usuario)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (entidade, entidade_id, acao, descricao, usuario))
         connection.commit()
     except Exception as e:
         print(f"Erro ao registrar log: {e}")
@@ -72,7 +74,8 @@ def logs():
                 entidade_id, 
                 acao, 
                 descricao, 
-                data_hora 
+                data_hora,
+                usuario
             FROM logs_estoque
             ORDER BY data_hora DESC
         """)
@@ -147,12 +150,13 @@ def login():
         cursor = connection.cursor(dictionary=True)
 
         try:
-            cursor.execute("SELECT * FROM usuarios WHERE email = %s AND senha = %s", (email, password))
+            cursor.execute("SELECT id, email, role FROM usuarios WHERE email = %s AND senha = %s", (email, password))
             user = cursor.fetchone()
 
             if user:
+                # Armazene o ID e o papel (role) do usuário na sessão
                 session['user_id'] = user['id']
-           #     session['user_name'] = user['nome']
+                session['user_role'] = user['role']  # Certifique-se de que 'role' existe no banco de dados
                 flash("Login realizado com sucesso!", "success")
                 return render_template('index.html')
             else:
@@ -164,6 +168,7 @@ def login():
             connection.close()
     return render_template('login.html')
 
+
 # Página de logout
 @app.route('/logout')
 def logout():
@@ -171,12 +176,27 @@ def logout():
     flash("Você foi desconectado.", "info")
     return redirect(url_for('login'))
 
+def permission_required(required_role):
+    def decorator(func):
+        @wraps(func)
+        def wrapped_view(*args, **kwargs):
+            user_role = session.get('user_role')  # Recupera a permissão do usuário da sessão
+            print(f"Permissão do usuário: {user_role}")  # Depuração
+            if user_role != required_role:
+                flash("Você não tem permissão para acessar esta página.", "danger")
+                return render_template('index.html')
+            return func(*args, **kwargs)
+        return wrapped_view
+    return decorator
+
+
 # Página inicial (exemplo de rota protegida)
 @app.route('/')
 @login_required
 def home():
     connection = create_connection()
     cursor = connection.cursor()
+    #  print(f"Usuário logado: {session.get('user_id')}, Permissão: {session.get('user_role')}")
     try:
         # Busca os 10 logs mais recentes
         cursor.execute("SELECT entidade, entidade_id, acao, descricao, data_hora FROM logs_estoque ORDER BY data_hora DESC LIMIT 10")
@@ -189,6 +209,7 @@ def home():
     return render_template('index.html', title="Página Principal", logs=logs)
 @app.route('/cadastrar_produto', methods=['GET', 'POST'])
 @login_required
+@permission_required('admin')
 def cadastrar_produto():
     if request.method == 'POST':
         nome = request.form['nome']
@@ -208,7 +229,8 @@ def cadastrar_produto():
                 entidade='produto',
                 entidade_id=cursor.lastrowid,  # ID do produto recém-criado
                 acao='criação',
-                descricao=f"Produto '{nome}' cadastrado com {quantidade} unidades e preço {preco}."
+                descricao=f"Produto '{nome}' cadastrado com {quantidade} unidades e preço {preco}.",
+                usuario = session.get('user_id', 'Desconhecido')  # Busca o ID do usuário logado ou 'Desconhecido'
             )
             flash("Produto cadastrado com sucesso!", "success")
         except Exception as e:
@@ -226,6 +248,7 @@ def cadastrar_produto():
 
 @app.route('/cadastrar_produto/sucesso', methods=['POST'])
 @login_required
+@permission_required('admin')
 def sucesso_cadastro_produto():
     nome = request.form['nome']
     descricao = request.form['descricao']
@@ -250,6 +273,7 @@ def sucesso_cadastro_produto():
 
 @app.route('/entradas')
 @login_required
+@permission_required('viewer')
 def entradas():
     connection = create_connection()
     cursor = connection.cursor()
@@ -274,6 +298,7 @@ def entradas():
 
 @app.route('/saidas')
 @login_required
+@permission_required('viewer')
 def saidas():
     connection = create_connection()
     cursor = connection.cursor()
@@ -300,6 +325,7 @@ def saidas():
 
 @app.route('/buscar_produtos', methods=['GET'])
 @login_required
+@permission_required('viewer')
 def buscar_produtos():
     query = request.args.get('query', '')
     produtos = buscar_produtos(query)
@@ -365,7 +391,8 @@ def update_quantidade(produto_id, quantidade):
             entidade='produto',
             entidade_id=produto_id,
             acao='entrada' if quantidade > 0 else 'saída',
-            descricao=f"Alteração de quantidade: {quantidade} unidades."
+            descricao=f"Alteração de quantidade: {quantidade} unidades.",
+            usuario = session.get('user_id', 'Desconhecido')  # Busca o ID do usuário logado ou 'Desconhecido'
         )
     except Exception as e:
         print(f"Erro: {e}")
@@ -378,6 +405,7 @@ def get_db_connection():
 
 @app.route('/cadastrar_categoria', methods=['GET', 'POST'])
 @login_required
+@permission_required('admin')
 def cadastrar_categoria():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -403,7 +431,8 @@ def cadastrar_categoria():
                         entidade='categoria',
                         entidade_id=cursor.lastrowid,
                         acao='criação',
-                        descricao=f"Categoria '{nome}' criada com descrição: {descricao}."
+                        descricao=f"Categoria '{nome}' criada com descrição: {descricao}.",
+                        usuario = session.get('user_id', 'Desconhecido')  # Busca o ID do usuário logado ou 'Desconhecido
                     )
                     flash("Categoria cadastrada com sucesso!", "success")
                 except Exception as e:
@@ -420,6 +449,7 @@ def cadastrar_categoria():
 
 @app.route('/remover_categoria/<int:categoria_id>', methods=['GET', 'POST'])
 @login_required
+@permission_required('admin')
 def remover_categoria(categoria_id):
     if request.method == 'POST':
         conn = get_db_connection()
@@ -436,7 +466,8 @@ def remover_categoria(categoria_id):
             entidade='categoria',
             entidade_id=categoria_id,
             acao='removido',
-            descricao=f"Categoria ID={categoria_id} foi removida e desassociada dos produtos."
+            descricao=f"Categoria ID={categoria_id} foi removida e desassociada dos produtos.",
+            usuario = session.get('user_id', 'Desconhecido')  # Busca o ID do usuário logado ou 'Desconhecido'
         )
         flash("Categoria desassociada com sucesso!", "success")
         conn.close()
@@ -446,6 +477,7 @@ def remover_categoria(categoria_id):
 
 @app.route('/editar_categoria/<int:categoria_id>', methods=['GET', 'POST'])
 @login_required
+@permission_required('admin')
 def editar_categoria(categoria_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -474,7 +506,8 @@ def editar_categoria(categoria_id):
                     entidade='categoria',
                     entidade_id=categoria_id,
                     acao='edição',
-                    descricao=f"Categoria ID={categoria_id} editada. Novo Nome='{nome}', Descrição='{descricao}'."
+                    descricao=f"Categoria ID={categoria_id} editada. Novo Nome='{nome}', Descrição='{descricao}'.",
+                    usuario = session.get('user_id', 'Desconhecido')  # Busca o ID do usuário logado ou 'Desconhecido'
                 )
             except Exception as e:
                 flash(f"Erro ao editar a categoria: {e}", "danger")
@@ -491,6 +524,7 @@ def editar_categoria(categoria_id):
 
 @app.route('/editar_produto/<int:produto_id>', methods=['GET', 'POST'])
 @login_required
+@permission_required('admin')
 def editar_produto(produto_id):
     connection = create_connection()
     cursor = connection.cursor(dictionary=True)
@@ -509,7 +543,8 @@ def editar_produto(produto_id):
             entidade='produto',
             entidade_id=produto_id,
             acao='edição',
-            descricao=f"Produto '{nome}' foi atualizado: Preço={preco}, Quantidade={quantidade}."
+            descricao=f"Produto '{nome}' foi atualizado: Preço={preco}, Quantidade={quantidade}.",
+            usuario = session.get('user_id', 'Desconhecido')  # Busca o ID do usuário logado ou 'Desconhecido'
         )
 
         flash("Produto editado com sucesso!", "success")
@@ -538,6 +573,7 @@ def editar_produto(produto_id):
 
 @app.route('/remover_produto/<int:produto_id>', methods=['GET', 'POST'])
 @login_required
+@permission_required('admin')
 def remover_produto(produto_id):
     if request.method == 'POST':
         connection = create_connection()
@@ -550,7 +586,8 @@ def remover_produto(produto_id):
                 entidade='produto',
                 entidade_id=produto_id,
                 acao='removido',
-                descricao=f"Produto ID={produto_id} foi removido."
+                descricao=f"Produto ID={produto_id} foi removido.",
+                usuario = session.get('user_id', 'Desconhecido')  # Busca o ID do usuário logado ou 'Desconhecido'
             )
 
         except Exception as e:
@@ -566,6 +603,7 @@ def remover_produto(produto_id):
 
 @app.route('/detalhes_produto/<int:produto_id>')
 @login_required
+@permission_required('viewer')
 def detalhes_produto(produto_id):
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor(dictionary=True)
@@ -639,6 +677,7 @@ def get_categoria(categoria_id):
 
 @app.route('/categoria/listar', methods=['GET'])
 @login_required
+@permission_required('viewer')
 def listar_categorias():
     connection = create_connection()
     cursor = connection.cursor(dictionary=True)

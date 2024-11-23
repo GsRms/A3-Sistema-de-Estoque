@@ -38,11 +38,19 @@ CREATE TABLE IF NOT EXISTS saidas (
  FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );
 
-CREATE TABLE IF NOT EXISTS usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    senha VARCHAR(255) NOT NULL
-);
+CREATE TABLE `usuarios` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`email` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_general_ci',
+	`senha` VARCHAR(255) NOT NULL COLLATE 'utf8mb4_general_ci',
+	`role` VARCHAR(20) NOT NULL DEFAULT 'padrao' COLLATE 'utf8mb4_general_ci',
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `email` (`email`) USING BTREE
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=3
+;
+
 
 CREATE TABLE logs_estoque (
     id INT AUTO_INCREMENT PRIMARY KEY,
