@@ -41,17 +41,13 @@ CREATE TABLE IF NOT EXISTS saidas (
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
-    senha VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'padrao'
-    
+    senha VARCHAR(255) NOT NULL
 );
-
 
 CREATE TABLE logs_estoque (
     id INT AUTO_INCREMENT PRIMARY KEY,
     entidade VARCHAR(50) NOT NULL,          -- Tipo da entidade (ex.: 'produto', 'categoria')
-    entidade_id INT,     
-    usuario VARCHAR(50) NOT NULL;                   -- ID da entidade relacionada (produto_id, categoria_id, etc.)
+    entidade_id INT,                        -- ID da entidade relacionada (produto_id, categoria_id, etc.)
     descricao TEXT NOT NULL,                -- Descrição detalhada do log
     quantidade INT,                         -- Quantidade (se aplicável)
     tipo VARCHAR(50) NOT NULL,              -- Tipo de operação (ex.: 'entrada', 'saída', 'edição')

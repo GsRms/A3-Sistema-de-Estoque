@@ -124,25 +124,35 @@ th {
   background-color: #f2f2f2;
 }
 
-.btn-search,
 .btn-edit {
-    background-color: #f39c12; /* Amarelo dourado */
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    text-decoration: none;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #0d4202;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
-.btn-edit:hover {
-    background-color: #e67e22;
+
+/* Arquivo: styles.css */
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
-.btn-delete {
-    background-color: #e74c3c; /* Vermelho */
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-}
-.btn-delete:hover {
-    background-color: #c0392b;
+
+.btn-search,
+.btn-delete,
+.btn-edit {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .form-delete button {
@@ -412,7 +422,7 @@ hr {
 
 
 .formLogin input:focus {
-    border: 1px solid #480ca8;
+    border: 1px solid #f72585;
 }
 
 .formLogin label {
@@ -429,7 +439,19 @@ hr {
 }
 
 .formLogin a:hover {
-    color: #480ca8;
+    color: #f72585;
+}
+
+.btn {
+    background-color: #f72585;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    border: none !important;
+    transition: all linear 160ms;
+    cursor: pointer;
+    margin: 0 !important;
+
 }
 
 /* TELA DE LOGIN */
@@ -507,13 +529,15 @@ hr {
 }
 
 .btn {
-  margin: 10px;
-  padding: 10px 20px;
-  background-color: #280242;
-  color: white;
-  text-decoration: none;
-  border-radius: 5px;
-  transition: background-color 0.3s;
+  background-color: #f72585;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none !important;
+  transition: all linear 160ms;
+  cursor: pointer;
+  margin: 0 !important;
+
 }
 
 .logs-container {

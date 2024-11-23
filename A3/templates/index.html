@@ -9,22 +9,17 @@
     <hr>
     <div class="row mt-5">
         <!-- Categorias -->
-        {% if session['user_role'] == 'admin' %}
         <div class="col-lg-4 col-md-6">
             <div class="card nui-card">
                 <div class="card-body text-center">
                     <i class="fas fa-layer-group card-icon"></i>
                     <h5 class="card-title">Categorias</h5>
                     <p class="card-text">Organize suas categorias de forma eficiente.</p>
-                    
                     <a href="{{ url_for('cadastrar_categoria') }}" class="btn btn-primary btn-action">Gerenciar Categorias</a>
-                    
                 </div>
             </div>
         </div>
-        {% endif %}
         <!-- Produtos -->
-        {% if session['user_role'] == 'admin' %}
         <div class="col-lg-4 col-md-6">
             <div class="card nui-card">
                 <div class="card-body text-center">
@@ -32,27 +27,21 @@
                     <h5 class="card-title">Produtos</h5>
                     <p class="card-text">Controle seus produtos no estoque.</p>
                     <a href="{{ url_for('cadastrar_produto') }}" class="btn btn-primary btn-action">Gerenciar Produtos</a>
-
                 </div>
             </div>
         </div>
-        {% endif %}
         <!-- Fluxo de Estoque -->
-        {% if session['user_role'] in ['viewer', 'admin'] %}
         <div class="col-lg-4 col-md-12">
             <div class="card nui-card">
                 <div class="card-body text-center">
                     <i class="fas fa-exchange-alt card-icon"></i>
-                    <h5 class="card-title">Fluxo do Estoque</h5>
-                    <p class="card-text">Entradas e saídas de produtos.</p>
+                    <h5 class="card-title">Fluxo de Estoque</h5>
+                    <p class="card-text">Gerencie entradas e saídas de produtos.</p>
                     <a href="{{ url_for('logs') }}" class="btn btn-success btn-action">Registro de Logs</a>
-
                 </div>
             </div>
         </div>
     </div>
-    {% endif %}
-    {% if session['user_role'] in ['viewer', 'admin'] %}
     <div class="row mt-4">
         <!-- Busca de Produtos -->
         <div class="col-lg-12">
@@ -66,6 +55,5 @@
             </div>
         </div>
     </div>
-    {% endif %}
 </div>
 {% endblock %}
