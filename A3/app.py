@@ -273,7 +273,7 @@ def sucesso_cadastro_produto():
 
 @app.route('/entradas')
 @login_required
-@permission_required('viewer')
+@permission_required('viewer', 'admin')
 def entradas():
     connection = create_connection()
     cursor = connection.cursor()
@@ -298,7 +298,7 @@ def entradas():
 
 @app.route('/saidas')
 @login_required
-@permission_required('viewer')
+@permission_required('viewer', 'admin')
 def saidas():
     connection = create_connection()
     cursor = connection.cursor()
@@ -325,7 +325,7 @@ def saidas():
 
 @app.route('/buscar_produtos', methods=['GET'])
 @login_required
-@permission_required('viewer')
+@permission_required('viewer', 'admin')
 def buscar_produtos():
     query = request.args.get('query', '')
     produtos = buscar_produtos(query)
@@ -603,7 +603,7 @@ def remover_produto(produto_id):
 
 @app.route('/detalhes_produto/<int:produto_id>')
 @login_required
-@permission_required('viewer')
+@permission_required('viewer', 'admin')
 def detalhes_produto(produto_id):
     conn = mysql.connector.connect(**db_config)
     cursor = conn.cursor(dictionary=True)
@@ -677,7 +677,7 @@ def get_categoria(categoria_id):
 
 @app.route('/categoria/listar', methods=['GET'])
 @login_required
-@permission_required('viewer')
+@permission_required('viewer', 'admin')
 def listar_categorias():
     connection = create_connection()
     cursor = connection.cursor(dictionary=True)
