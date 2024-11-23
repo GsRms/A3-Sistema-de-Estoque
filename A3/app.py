@@ -4,7 +4,7 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = 'hjsewffdbasbdasewrdewsssdkskldsajkodnasjkdjk'
+app.secret_key = 'hjsewffdbasbdasewrdewsssdkskldfsfjkodnasjkdjk'
 db_config = {
     'host': 'localhost',
     'user': 'root',
