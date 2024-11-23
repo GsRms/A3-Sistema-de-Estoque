@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-container">
+    <h2>Erro</h2>
+    <p>O produto solicitado não foi encontrado.</p>
+    <a href="{{ url_for('buscar_produtos') }}" class="btn">Voltar à Busca de Produtos</a>
+</div>
+{% endblock %}
